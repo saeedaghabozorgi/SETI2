@@ -12,12 +12,12 @@ IMAGE_SIZE = 24
 
 # Global constants describing the SETI data set.
 NUM_CLASSES = 10
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 1000
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 900
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 100
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 90
 
 
-def read_cifar10(filename_queue):
-  """Reads and parses examples from CIFAR10 data files.
+def read_SETI(filename_queue):
+  """Reads and parses examples from SETI data files.
 
   Recommendation: if you want N-way read parallelism, call this function
   N times.  This will give you N independent Readers reading different
@@ -38,14 +38,12 @@ def read_cifar10(filename_queue):
       uint8image: a [height, width, depth] uint8 Tensor with the image data
   """
 
-  class CIFAR10Record(object):
+  class SETIRecord(object):
     pass
-  result = CIFAR10Record()
+  result = SETIRecord()
 
-  # Dimensions of the images in the CIFAR-10 dataset.
-  # See http://www.cs.toronto.edu/~kriz/cifar.html for a description of the
-  # input format.
-  label_bytes = 1  # 2 for CIFAR-100
+  # Dimensions of the images in the SETI dataset.
+  label_bytes = 1  
   result.height = 32
   result.width = 32
   result.depth = 3
@@ -55,7 +53,7 @@ def read_cifar10(filename_queue):
   record_bytes = label_bytes + image_bytes
 
   # Read a record, getting filenames from the filename_queue.  No
-  # header or footer in the CIFAR-10 format, so we leave header_bytes
+  # header or footer in the SETI format, so we leave header_bytes
   # and footer_bytes at their default of 0.
   reader = tf.FixedLengthRecordReader(record_bytes=record_bytes)
   result.key, value = reader.read(filename_queue)
@@ -119,7 +117,7 @@ def _generate_image_and_label_batch(image, label, min_queue_examples,
 
 
 def distorted_inputs(data_dir, batch_size):
-  """Construct distorted input for CIFAR training using the Reader ops.
+  """Construct distorted input for SETI training using the Reader ops.
 
   Args:
     data_dir: Path to the SETI data directory.
@@ -130,16 +128,17 @@ def distorted_inputs(data_dir, batch_size):
     labels: Labels. 1D tensor of [batch_size] size.
   """
   filenames = [os.path.join(data_dir, 'data_batch_%d.bin' % i)
-               for i in xrange(1, 6)]
+               for i in xrange(1, 5)]
   for f in filenames:
     if not tf.gfile.Exists(f):
       raise ValueError('Failed to find file: ' + f)
 
   # Create a queue that produces the filenames to read.
+  # string_input_producer creates a FIFO queue for holding the filenames until the reader needs them.
   filename_queue = tf.train.string_input_producer(filenames)
 
   # Read examples from files in the filename queue.
-  read_input = read_cifar10(filename_queue)
+  read_input = read_SETI(filename_queue)
   reshaped_image = tf.cast(read_input.uint8image, tf.float32)
 
   height = IMAGE_SIZE
@@ -158,10 +157,8 @@ def distorted_inputs(data_dir, batch_size):
   # the order their operation.
   # NOTE: since per_image_standardization zeros the mean and makes
   # the stddev unit, this likely has no effect see tensorflow#1458.
-  distorted_image = tf.image.random_brightness(distorted_image,
-                                               max_delta=63)
-  distorted_image = tf.image.random_contrast(distorted_image,
-                                             lower=0.2, upper=1.8)
+  distorted_image = tf.image.random_brightness(distorted_image, max_delta=63)
+  distorted_image = tf.image.random_contrast(distorted_image, lower=0.2, upper=1.8)
 
   # Subtract off the mean and divide by the variance of the pixels.
   float_image = tf.image.per_image_standardization(distorted_image)
