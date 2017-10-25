@@ -11,7 +11,7 @@ import SETI
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('train_dir', '/tmp/SETI_train',
+tf.app.flags.DEFINE_string('train_dir', '/tmp/SETI2/SETI_train',
                            """Directory where to write event logs """
                            """and checkpoint.""")
 tf.app.flags.DEFINE_integer('max_steps', 1000000,

@@ -11,8 +11,8 @@ import tensorflow as tf
 IMAGE_SIZE = 24
 
 # Global constants describing the SETI data set.
-NUM_CLASSES = 10
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 100
+NUM_CLASSES = 4
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 300
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 90
 
 
